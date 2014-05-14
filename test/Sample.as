@@ -7,6 +7,31 @@ import Language.Haskell.TH
 sr = 44100 :: Int
 dt = 1 / (fromIntegral sr)
 
+counter :: ArrowInit a => a () Int
+counter = proc () -> do
+  rec x <- init (0 :: Int) -< x + 1
+  returnA -< x
+
+plusOne :: ArrowInit a => a Int Int
+plusOne = proc x -> do
+  returnA -< x + (1 :: Int)
+
+linkDynamic :: (ArrowFix a, ArrowChoice a, ArrowInit a) => a b b -> a (Int,b) b
+linkDynamic sf = afix $ \linkDynamic -> proc (n,b) -> do
+  case n of
+    0 -> returnA -< b
+    k -> do b'  <- sf -< b
+            b'' <- linkDynamic -< (k-1,b')
+            returnA -< b''
+
+runDynamic :: (ArrowFix a, ArrowChoice a, ArrowInit a) => a () c -> a Int [c]
+runDynamic sf = afix $ \runDynamic -> proc n -> do
+  case n of
+    0 -> returnA -< []
+    k -> do c <- sf -< ()
+            cs <- runDynamic -< k-1
+            returnA -< c:cs
+
 exp :: ArrowInit a => a () Double
 exp = proc () -> do
   rec let e = 1 + i
@@ -16,7 +41,7 @@ exp = proc () -> do
 integral :: ArrowInit a => a Double Double
 integral = proc x -> do
   rec let i' = i + x * dt
-      i <- init 0 -< i'
+      i <- init (0 :: Double) -< i'
   returnA -< i
 
 sine :: ArrowInit a => Double -> a () Double

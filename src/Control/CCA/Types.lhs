@@ -21,4 +21,6 @@
 >   loopD :: e -> ((b, e) -> (c, e)) -> a b c 
 >   loopD i f = loop (arr f >>> second (init i))
 
+> class ArrowFix a where
+>   afix :: (a b c -> a b c) -> a b c
 
