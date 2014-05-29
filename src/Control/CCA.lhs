@@ -3,6 +3,7 @@
 > module Control.CCA 
 >   ((>>>), (<<<), first, second, (***), (&&&), loop, 
 >    Arrow, ArrowLoop, ArrowInit, 
+>    ArrowChoice, (|||), ArrowFix, afix,
 >    arr, init, arr', init', constant,
 >    returnA,
 >    norm, normOpt) where
